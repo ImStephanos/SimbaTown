@@ -22,7 +22,6 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* SIDES */
     .side {
       width: 180px;
       display: flex;
@@ -42,7 +41,6 @@
       box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
 
-    /* CENTER */
     .center {
       flex: 1;
       display: flex;
@@ -115,7 +113,7 @@
       to { transform: translateY(-10vh); }
     }
 
-    /* DRAWING LAYER (FIXED - DOES NOT BLOCK UI) */
+    /* DRAW CANVAS */
     canvas {
       position: fixed;
       inset: 0;
@@ -160,7 +158,6 @@
 
   <div id="caption"></div>
 
-  <!-- MOOD -->
   <div class="moodBox">
     <div id="moodLabel">🐶 How much have Simba's photos improved your mood?</div>
     <input type="range" min="0" max="100" value="60" oninput="updateMood(this.value)">
@@ -228,7 +225,7 @@ function toggleMusic(){
   m.paused ? m.play() : m.pause();
 }
 
-/* MOOD → CHANGES BACKGROUND COLOURS */
+/* MOOD → CLEAN BACKGROUND SWITCH */
 function updateMood(v){
   document.getElementById("moodValue").innerText = v + "%";
 
@@ -255,7 +252,10 @@ function showZinchenko(){
   },6000);
 }
 
-/* DRAWING SYSTEM (FIXED PROPERLY) */
+/* =========================
+   ✍️ NEW DRAWING ENGINE
+   ========================= */
+
 let ctx;
 let drawing = false;
 let strokes = [];
@@ -264,45 +264,68 @@ window.onload = () => {
   const c = document.getElementById("draw");
   c.width = window.innerWidth;
   c.height = window.innerHeight;
-
   ctx = c.getContext("2d");
 
-  document.addEventListener("mousedown", startDraw);
-  document.addEventListener("mouseup", stopDraw);
-  document.addEventListener("mousemove", draw);
+  document.addEventListener("mousedown", startStroke);
+  document.addEventListener("mouseup", endStroke);
+  document.addEventListener("mousemove", drawMove);
 
   loadSides();
   spawnParticles();
 
-  setInterval(fadeStrokes, 1000);
+  setInterval(updateCanvas, 30);
 };
 
-function startDraw(e){
+/* START NEW STROKE */
+function startStroke(e){
   drawing = true;
-  ctx.beginPath();
-  ctx.moveTo(e.clientX, e.clientY);
+  const stroke = {
+    points: [],
+    time: Date.now()
+  };
+  strokes.push(stroke);
 }
 
-function stopDraw(){
+/* END STROKE */
+function endStroke(){
   drawing = false;
-  ctx.beginPath();
 }
 
-function draw(e){
+/* DRAW */
+function drawMove(e){
   if(!drawing) return;
 
-  ctx.strokeStyle = "#ff4d6d";
-  ctx.lineWidth = 4;
-  ctx.shadowBlur = 20;
-  ctx.shadowColor = "#ff4d6d";
-
-  ctx.lineTo(e.clientX, e.clientY);
-  ctx.stroke();
+  const stroke = strokes[strokes.length - 1];
+  stroke.points.push({x:e.clientX, y:e.clientY});
 }
 
-function fadeStrokes(){
-  ctx.fillStyle = "rgba(255,255,255,0.03)";
-  ctx.fillRect(0,0,window.innerWidth,window.innerHeight);
+/* RENDER + FADE SYSTEM */
+function updateCanvas(){
+  ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+
+  const now = Date.now();
+
+  strokes = strokes.filter(s => now - s.time < 10000);
+
+  for(const s of strokes){
+    ctx.beginPath();
+
+    for(let i=0;i<s.points.length;i++){
+      const p = s.points[i];
+
+      if(i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+
+    ctx.strokeStyle = "#ff4d6d";
+    ctx.lineWidth = 4;
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = "#ff4d6d";
+
+    ctx.globalAlpha = 1 - (now - s.time)/10000;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
 }
 
 /* SIDES */
@@ -327,9 +350,9 @@ function spawnParticles(){
   for(let i=0;i<120;i++){
     const p=document.createElement("div");
     p.className="particle";
-    p.style.width = p.style.height = (2 + Math.random()*5) + "px";
-    p.style.left = Math.random()*window.innerWidth + "px";
-    p.style.animationDuration = (4 + Math.random()*6) + "s";
+    p.style.width=p.style.height=(2+Math.random()*5)+"px";
+    p.style.left=Math.random()*window.innerWidth+"px";
+    p.style.animationDuration=(4+Math.random()*6)+"s";
     document.body.appendChild(p);
   }
 }
