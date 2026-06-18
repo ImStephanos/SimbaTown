@@ -41,7 +41,7 @@
 
     img {
       margin-top: 25px;
-      max-width: 300px;
+      max-width: 320px;
       border-radius: 15px;
       display: none;
       transition: all 0.3s ease;
@@ -52,7 +52,7 @@
       font-size: 18px;
       color: #333;
       display: none;
-      max-width: 400px;
+      max-width: 420px;
     }
   </style>
 </head>
@@ -69,24 +69,24 @@
 <div id="caption"></div>
 
 <script>
-const images = [
-  "dog1.jpg",
-  "dog2.jpg",
-  "dog3.jpg",
-  "dog4.jpg",
-  "dog5.jpg"
-];
+const images = Array.from({length: 30}, (_, i) => `dog${i + 1}.jpg`);
 
 const captions = [
   "Feeling down… welcome to Simba Town 🐶",
   "Simba has detected low mood levels. LOCK IN MACKENZIE.",
-  "Live Laugh Love Simba.",
-  "if you do not smile, simba will be sad.",
-  "Simba says, take a breath, you're safe here."
+  "Sad Mackenzie means Sad Simba, so lock tf in.",
+  "a smile from simba saves the day.",
+  "Simba Says: SMILE!!!.",
+  "Simba is a way of life.",
+  "Simba approves your existence.",
+  "He might not be the lion king but he is Simba.",
+  "No thoughts. Just Simba.",
+  "Welcome to the simba safehouse."
 ];
 
 function showDog() {
   const i = Math.floor(Math.random() * images.length);
+  const c = Math.floor(Math.random() * captions.length);
 
   const img = document.getElementById("dog");
   const cap = document.getElementById("caption");
@@ -94,7 +94,7 @@ function showDog() {
   img.src = images[i];
   img.style.display = "block";
 
-  cap.innerText = captions[i];
+  cap.innerText = captions[c];
   cap.style.display = "block";
 }
 </script>
