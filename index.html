@@ -2,23 +2,41 @@
 <html>
 <head>
   <title>Simba Town</title>
+
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       text-align: center;
       background: #fff7f0;
       padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: #444;
     }
 
     button {
       padding: 15px 20px;
       font-size: 16px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       background: #ff7b7b;
       color: white;
       cursor: pointer;
-      margin-top: 20px;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      background: #ff5f5f;
+      transform: scale(1.05);
     }
 
     img {
@@ -26,12 +44,15 @@
       max-width: 300px;
       border-radius: 15px;
       display: none;
+      transition: all 0.3s ease;
     }
 
     #caption {
       margin-top: 15px;
       font-size: 18px;
+      color: #333;
       display: none;
+      max-width: 400px;
     }
   </style>
 </head>
@@ -40,7 +61,7 @@
 
 <h1>🐶 Simba Town</h1>
 
-<p>Feeling down? Welcome to Simba Town.</p>
+<p>Feeling down… welcome to Simba Town.</p>
 
 <button onclick="showDog()">Click for comfort</button>
 
@@ -51,23 +72,30 @@
 const images = [
   "dog1.jpg",
   "dog2.jpg",
-  "dog3.jpg"
+  "dog3.jpg",
+  "dog4.jpg",
+  "dog5.jpg"
 ];
 
 const captions = [
-  "Simba says you're doing okay.",
-  "Official Simba Town emotional support moment.",
-  "This dog believes in you."
+  "Feeling down… welcome to Simba Town 🐶",
+  "Simba has detected low mood levels. LOCK IN MACKENZIE.",
+  "Live Laugh Love Simba.",
+  "if you do not smile, simba will be sad.",
+  "Simba says, take a breath, you're safe here."
 ];
 
 function showDog() {
   const i = Math.floor(Math.random() * images.length);
 
-  document.getElementById("dog").src = images[i];
-  document.getElementById("dog").style.display = "block";
+  const img = document.getElementById("dog");
+  const cap = document.getElementById("caption");
 
-  document.getElementById("caption").innerText = captions[i];
-  document.getElementById("caption").style.display = "block";
+  img.src = images[i];
+  img.style.display = "block";
+
+  cap.innerText = captions[i];
+  cap.style.display = "block";
 }
 </script>
 
