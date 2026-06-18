@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simba Town</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #fff7f0;
+      padding: 40px;
+    }
+
+    button {
+      padding: 15px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #ff7b7b;
+      color: white;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    img {
+      margin-top: 25px;
+      max-width: 300px;
+      border-radius: 15px;
+      display: none;
+    }
+
+    #caption {
+      margin-top: 15px;
+      font-size: 18px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🐶 Simba Town</h1>
+
+<p>Feeling down? Welcome to Simba Town.</p>
+
+<button onclick="showDog()">Click for comfort</button>
+
+<img id="dog" src="">
+<div id="caption"></div>
+
+<script>
+const images = [
+  "dog1.jpg",
+  "dog2.jpg",
+  "dog3.jpg"
+];
+
+const captions = [
+  "Simba says you're doing okay.",
+  "Official Simba Town emotional support moment.",
+  "This dog believes in you."
+];
+
+function showDog() {
+  const i = Math.floor(Math.random() * images.length);
+
+  document.getElementById("dog").src = images[i];
+  document.getElementById("dog").style.display = "block";
+
+  document.getElementById("caption").innerText = captions[i];
+  document.getElementById("caption").style.display = "block";
+}
+</script>
+
+</body>
+</html>
