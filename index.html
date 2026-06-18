@@ -8,20 +8,10 @@
       margin: 0;
       font-family: Arial, sans-serif;
       overflow: hidden;
-
-      background: linear-gradient(-45deg, #ffb3c6, #ffd6a5, #fdffb6, #caffbf);
-      background-size: 500% 500%;
-      animation: gradientMove 6s ease infinite;
-
       display: flex;
       height: 100vh;
       transition: background 0.6s ease;
-    }
-
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      background: #caffbf;
     }
 
     /* SIDES */
@@ -71,12 +61,6 @@
       background: #ff4d6d;
       color: white;
       cursor: pointer;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-      background: #ff2e63;
     }
 
     .grid {
@@ -91,7 +75,6 @@
       object-fit: cover;
       border-radius: 15px;
       display: none;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
 
     #caption {
@@ -101,35 +84,58 @@
       max-width: 420px;
     }
 
-    /* MOOD BOX */
     .moodBox {
       margin-top: 20px;
       background: rgba(255,255,255,0.4);
       padding: 12px;
       border-radius: 15px;
-      backdrop-filter: blur(5px);
     }
 
     input[type="range"] {
       width: 220px;
     }
 
-    /* PARTICLES (MORE INTENSE) */
+    /* PARTICLES */
     .particle {
       position: absolute;
-      width: 6px;
-      height: 6px;
-      background: white;
       border-radius: 50%;
       opacity: 0.8;
       animation: floatUp linear infinite;
       z-index: 1;
-      box-shadow: 0 0 10px rgba(255,255,255,0.6);
     }
 
     @keyframes floatUp {
       from { transform: translateY(100vh) scale(0.8); }
       to { transform: translateY(-10vh) scale(1.4); }
+    }
+
+    /* EASTER EGG */
+    #zinchenkoEgg {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.3;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #zinchenkoEgg:hover {
+      opacity: 0.7;
+      transform: scale(1.1);
+      transition: 0.2s;
+    }
+
+    #zinchenkoDogs {
+      display: none;
+      margin-top: 15px;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    #zinchenkoDogs img {
+      width: 120px;
+      height: 120px;
+      border-radius: 12px;
+      object-fit: cover;
     }
   </style>
 </head>
@@ -141,7 +147,6 @@
 <div class="center">
 
   <h1>🐶 Simba Town</h1>
-  <p>Feeling down… welcome to Simba Town.</p>
 
   <button onclick="toggleMusic()" id="musicBtn">Play Music 🎵</button>
   <button onclick="showDogs()">Click for comfort</button>
@@ -156,8 +161,19 @@
 
   <div class="moodBox">
     <p>How much has Simba improved your mood?</p>
-    <input type="range" min="0" max="100" value="50" id="moodSlider" oninput="updateMood(this.value)">
-    <div id="moodValue">50%</div>
+    <input type="range" min="0" max="100" value="60" id="moodSlider" oninput="updateMood(this.value)">
+    <div id="moodValue">60%</div>
+  </div>
+
+  <!-- ⚽ EASTER EGG -->
+  <div id="zinchenkoEgg" onclick="showZinchenko()">
+    ⚽ Zinchenko
+  </div>
+
+  <div id="zinchenkoDogs">
+    <img id="z1">
+    <img id="z2">
+    <img id="z3">
   </div>
 
 </div>
@@ -173,9 +189,8 @@ const images = Array.from({length: 30}, (_, i) => `dog${i + 1}.jpg`);
 
 function showDogs() {
   const ids = ["dog1", "dog2", "dog3"];
-  const caption = document.getElementById("caption");
-
   let picks = [];
+
   while (picks.length < 3) {
     let i = Math.floor(Math.random() * images.length);
     if (!picks.includes(i)) picks.push(i);
@@ -195,38 +210,64 @@ function toggleMusic() {
 
   if (music.paused) {
     music.volume = 0.5;
-
     music.play().then(() => {
       btn.innerText = "Pause Music ⏸️";
-    }).catch(() => {
-      alert("Tap again to start music");
     });
-
   } else {
     music.pause();
     btn.innerText = "Play Music 🎵";
   }
 }
 
-/* 📊 MOOD → BACKGROUND COLOR */
+/* 🌈 MOOD SYSTEM */
 function updateMood(val) {
   document.getElementById("moodValue").innerText = val + "%";
 
-  let color;
+  let bg, colors;
 
   if (val < 20) {
-    color = "#2b2d42"; // very low mood (dark)
+    bg = "#1a1a1a";
+    colors = ["#444", "#666"];
   } else if (val < 40) {
-    color = "#6c757d"; // low
+    bg = "#4a4e69";
+    colors = ["#6c757d", "#adb5bd"];
   } else if (val < 60) {
-    color = "#ffd6a5"; // neutral warm
+    bg = "#5f6f94";
+    colors = ["#4dabf7", "#74c0fc"];
   } else if (val < 80) {
-    color = "#caffbf"; // good
+    bg = "#caffbf";
+    colors = ["#8ce99a", "#b2f2bb"];
   } else {
-    color = "#9bf6ff"; // very happy
+    bg = "#ffb3d9";
+    colors = ["#ff4d6d", "#ff85a1", "#ff9ecf"];
   }
 
-  document.body.style.background = color;
+  document.body.style.background = bg;
+  regenerateParticles(colors);
+}
+
+/* ✨ PARTICLES */
+function regenerateParticles(colors) {
+  document.querySelectorAll(".particle").forEach(p => p.remove());
+
+  for (let i = 0; i < 80; i++) {
+    const p = document.createElement("div");
+    p.className = "particle";
+
+    const size = 4 + Math.random() * 8;
+
+    p.style.width = size + "px";
+    p.style.height = size + "px";
+
+    p.style.left = Math.random() * window.innerWidth + "px";
+    p.style.animationDuration = (3 + Math.random() * 5) + "s";
+
+    const c = colors[Math.floor(Math.random() * colors.length)];
+    p.style.background = c;
+    p.style.boxShadow = `0 0 10px ${c}`;
+
+    document.body.appendChild(p);
+  }
 }
 
 /* 🐾 SIDES */
@@ -246,28 +287,18 @@ function loadSides() {
   }
 }
 
-/* ✨ INTENSE PARTICLES */
-function createParticles() {
-  for (let i = 0; i < 60; i++) {
-    const p = document.createElement("div");
-    p.className = "particle";
+/* ⚽ ZINCHENKO EASTER EGG */
+function showZinchenko() {
+  document.getElementById("z1").src = "zin1.jpg";
+  document.getElementById("z2").src = "zin2.jpg";
+  document.getElementById("z3").src = "zin3.jpg";
 
-    const size = 4 + Math.random() * 6;
-
-    p.style.width = size + "px";
-    p.style.height = size + "px";
-
-    p.style.left = Math.random() * window.innerWidth + "px";
-    p.style.animationDuration = (3 + Math.random() * 5) + "s";
-    p.style.opacity = 0.4 + Math.random() * 0.6;
-
-    document.body.appendChild(p);
-  }
+  document.getElementById("zinchenkoDogs").style.display = "flex";
 }
 
 /* INIT */
 loadSides();
-createParticles();
+updateMood(60);
 </script>
 
 </body>
