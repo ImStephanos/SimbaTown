@@ -10,11 +10,9 @@
       overflow: hidden;
       display: flex;
       height: 100vh;
-      transition: background 0.6s ease;
       background: #caffbf;
     }
 
-    /* SIDES */
     .side {
       width: 180px;
       display: flex;
@@ -31,10 +29,8 @@
       height: 140px;
       object-fit: cover;
       border-radius: 15px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
 
-    /* CENTER */
     .center {
       flex: 1;
       display: flex;
@@ -42,8 +38,8 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      z-index: 2;
       position: relative;
+      z-index: 2;
     }
 
     button {
@@ -69,7 +65,13 @@
       display: none;
     }
 
-    /* MOOD */
+    #caption {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      max-width: 420px;
+    }
+
     .moodBox {
       margin-top: 20px;
       background: rgba(255,255,255,0.4);
@@ -81,45 +83,15 @@
       width: 220px;
     }
 
-    /* PARTICLES */
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.8;
-      animation: floatUp linear infinite;
-      z-index: 1;
-    }
-
-    @keyframes floatUp {
-      from { transform: translateY(100vh) scale(0.8); }
-      to { transform: translateY(-10vh) scale(1.4); }
-    }
-
-    /* ⚡ LIGHTNING FLASH */
     #flash {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: white;
       opacity: 0;
       pointer-events: none;
       z-index: 999;
     }
 
-    /* ✍️ DRAW LAYER */
-    #drawCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 5;
-      pointer-events: none;
-    }
-
-    /* ⚽ ZINCHENKO */
     #zinchenkoDogs {
       position: fixed;
       top: 20%;
@@ -128,12 +100,20 @@
       display: none;
       gap: 10px;
       z-index: 10;
+      transition: opacity 1s ease;
     }
 
     #zinchenkoDogs img {
       width: 140px;
       height: 140px;
       border-radius: 12px;
+    }
+
+    #drawCanvas {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -155,12 +135,16 @@
     <img id="dog1"><img id="dog2"><img id="dog3">
   </div>
 
+  <div id="caption"></div>
+
   <div class="moodBox">
-    <input type="range" min="0" max="100" value="60" oninput="updateMood(this.value)">
+    <input type="range" min="0" max="100" value="60" id="moodSlider" oninput="updateMood(this.value)">
     <div id="moodValue">60%</div>
   </div>
 
-  <div onclick="showZinchenko()" style="opacity:0.3;cursor:pointer;">⚽ Zinchenko</div>
+  <div onclick="showZinchenko()" style="opacity:0.3;cursor:pointer;margin-top:10px;">
+    ⚽ Zinchenko
+  </div>
 
 </div>
 
@@ -177,65 +161,60 @@
 </audio>
 
 <script>
-const images = Array.from({length:30}, (_,i)=>`dog${i+1}.jpg`);
 
-let isDrawing = false;
-let ctx;
+/* 🐶 YOUR FULL CAPTION LIST RESTORED */
+const captions = [
+  "Simba Says: Smile!",
+  "Simba Says: Lock In!",
+  "Simba Says: He Loves you!",
+  "He Might not be The Lion King but he is Simba",
+  "Mackenzie, You are Enough!",
+  "A Photo of Simba a day keeps the Stress away",
+  "Welcome to The Simba Safehouse",
+  "Simba Nation RISE UP!",
+  "PAUSE, Go and Cuddle Simba IMMEDIATELY!!!.",
+  "Did you know today is National Hug Simba Day",
+  "Simbaaaaa",
+  "A sad Mackenzie equals a sad Simba so lock tf in",
+  "You are Loved",
+  "If you’re reading this you need to Hug Simba!",
+  "Fun Fact! Did you know hugging Simba for 7 minutes a day can reduce hair loss by 72%",
+  "Simba… Simba… Simbaa…"
+];
 
-window.onload = () => {
-  const canvas = document.getElementById("drawCanvas");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  ctx = canvas.getContext("2d");
+function showDogs(){
+  const ids=["dog1","dog2","dog3"];
 
-  canvas.addEventListener("mousemove", draw);
-  canvas.addEventListener("mousedown", ()=>isDrawing=true);
-  canvas.addEventListener("mouseup", ()=>isDrawing=false);
+  for(let i=0;i<3;i++){
+    const el=document.getElementById(ids[i]);
+    el.src=`dog${Math.floor(Math.random()*30)+1}.jpg`;
+    el.style.display="block";
+  }
 
-  loadSides();
-  updateMood(60);
-  spawnParticles();
-  lightningLoop();
-};
-
-/* ✍️ NEON DRAWING */
-function draw(e){
-  if(!isDrawing) return;
-
-  const mood = document.getElementById("moodSlider")?.value || 60;
-
-  const colors = mood > 80 ? ["#ff4d6d","#ff85a1"] :
-                 mood > 40 ? ["#4dabf7","#74c0fc"] :
-                 ["#adb5bd","#666"];
-
-  const color = colors[Math.floor(Math.random()*colors.length)];
-
-  ctx.strokeStyle = color;
-  ctx.shadowBlur = 15;
-  ctx.shadowColor = color;
-  ctx.lineWidth = 4;
-
-  ctx.lineTo(e.clientX, e.clientY);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(e.clientX, e.clientY);
-
-  setTimeout(()=>fadeCanvas(), 2000);
+  document.getElementById("caption").innerText =
+    captions[Math.floor(Math.random()*captions.length)];
 }
 
-/* fade drawing */
-function fadeCanvas(){
-  ctx.fillStyle = "rgba(0,0,0,0.05)";
-  ctx.fillRect(0,0,window.innerWidth,window.innerHeight);
+/* 🎵 MUSIC */
+function toggleMusic(){
+  const m=document.getElementById("bgmusic");
+  m.paused ? m.play() : m.pause();
 }
 
-/* ⚽ ZINCHENKO FADE */
+/* ⚡ LIGHTNING */
+function triggerLightning(){
+  const f=document.getElementById("flash");
+  f.style.opacity=1;
+  setTimeout(()=>f.style.opacity=0,150);
+}
+
+/* ⚽ ZINCHENKO */
 function showZinchenko(){
-  const box = document.getElementById("zinchenkoDogs");
-  box.style.display = "flex";
+  const box=document.getElementById("zinchenkoDogs");
+  box.style.display="flex";
 
   setTimeout(()=>{
-    box.style.opacity = "0";
+    box.style.opacity="0";
     setTimeout(()=>{
       box.style.display="none";
       box.style.opacity="1";
@@ -243,51 +222,6 @@ function showZinchenko(){
   },6000);
 }
 
-/* ⚡ LIGHTNING */
-function triggerLightning(){
-  const flash = document.getElementById("flash");
-
-  flash.style.opacity = 1;
-
-  setTimeout(()=>flash.style.opacity = 0, 150);
-}
-
-function lightningLoop(){
-  setInterval(()=>{
-    if(Math.random() > 0.85){
-      triggerLightning();
-    }
-  }, 2000);
-}
-
-/* PARTICLES (kept simple) */
-function spawnParticles(){
-  for(let i=0;i<80;i++){
-    const p = document.createElement("div");
-    p.className="particle";
-    p.style.width = p.style.height = (3+Math.random()*6)+"px";
-    p.style.left = Math.random()*window.innerWidth+"px";
-    p.style.animationDuration = (3+Math.random()*5)+"s";
-    p.style.background = "#fff";
-    document.body.appendChild(p);
-  }
-}
-
-/* MUSIC */
-function toggleMusic(){
-  const m = document.getElementById("bgmusic");
-  m.paused ? m.play() : m.pause();
-}
-
-/* DOGS */
-function showDogs(){
-  const ids=["dog1","dog2","dog3"];
-  for(let i=0;i<3;i++){
-    const el=document.getElementById(ids[i]);
-    el.src=`dog${Math.floor(Math.random()*30)+1}.jpg`;
-    el.style.display="block";
-  }
-}
 </script>
 
 </body>
