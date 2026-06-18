@@ -21,6 +21,7 @@
       100% { background-position: 0% 50%; }
     }
 
+    /* SIDES */
     .side {
       width: 180px;
       display: flex;
@@ -29,17 +30,18 @@
       justify-content: center;
       gap: 10px;
       padding: 10px;
-      z-index: 2;
+      z-index: 3;
     }
 
     .side img {
       width: 140px;
       height: 140px;
-      object-fit: cover;
       border-radius: 15px;
+      object-fit: cover;
       box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
 
+    /* CENTER UI */
     .center {
       flex: 1;
       display: flex;
@@ -47,7 +49,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      z-index: 2;
+      z-index: 3;
       position: relative;
     }
 
@@ -81,26 +83,38 @@
       max-width: 420px;
     }
 
+    /* MOOD */
+    .moodBox {
+      margin-top: 15px;
+      background: rgba(255,255,255,0.4);
+      padding: 12px;
+      border-radius: 15px;
+    }
+
+    input[type="range"] {
+      width: 220px;
+    }
+
     /* PARTICLES */
     .particle {
       position: absolute;
       border-radius: 50%;
-      background: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.6);
       animation: floatUp linear infinite;
       z-index: 1;
     }
 
     @keyframes floatUp {
-      from { transform: translateY(100vh) scale(0.8); }
-      to { transform: translateY(-10vh) scale(1.4); }
+      from { transform: translateY(100vh); }
+      to { transform: translateY(-10vh); }
     }
 
-    /* DRAWING CANVAS */
+    /* DRAW LAYER (IMPORTANT FIX) */
     canvas {
       position: fixed;
       inset: 0;
       z-index: 5;
-      pointer-events: none;
+      cursor: crosshair;
     }
 
     /* ZINCHENKO */
@@ -140,6 +154,12 @@
 
   <div id="caption"></div>
 
+  <!-- ✅ MOOD BAR RESTORED -->
+  <div class="moodBox">
+    <input type="range" min="0" max="100" value="60" oninput="updateMood(this.value)">
+    <div id="moodValue">60%</div>
+  </div>
+
   <div onclick="showZinchenko()" style="opacity:0.3;cursor:pointer;margin-top:10px;">
     ⚽ Zinchenko
   </div>
@@ -160,7 +180,8 @@
 
 <script>
 
-/* CAPTIONS (YOUR ORIGINAL SET RESTORED) */
+const images = Array.from({length:30}, (_,i)=>`dog${i+1}.jpg`);
+
 const captions = [
   "Simba Says: Smile!",
   "Simba Says: Lock In!",
@@ -180,9 +201,7 @@ const captions = [
   "Simba… Simba… Simbaa…"
 ];
 
-const images = Array.from({length:30}, (_,i)=>`dog${i+1}.jpg`);
-
-/* DOGS + CAPTION */
+/* 🐶 DOGS */
 function showDogs(){
   const ids=["dog1","dog2","dog3"];
 
@@ -196,22 +215,69 @@ function showDogs(){
     captions[Math.floor(Math.random()*captions.length)];
 }
 
-/* MUSIC */
+/* 🎵 MUSIC */
 function toggleMusic(){
   const m=document.getElementById("music");
   m.paused ? m.play() : m.pause();
 }
 
-/* ZINCHENKO */
+/* 🌈 MOOD (NOW CONNECTED PROPERLY) */
+function updateMood(v){
+  document.getElementById("moodValue").innerText = v + "%";
+
+  const intensity = v / 100;
+
+  document.querySelectorAll(".particle").forEach(p=>{
+    p.style.opacity = 0.2 + intensity;
+  });
+
+  document.body.style.filter = `saturate(${0.7 + intensity})`;
+}
+
+/* ⚽ ZINCHENKO */
 function showZinchenko(){
   const box=document.getElementById("zinchenkoDogs");
   box.style.display="flex";
-  box.style.opacity="1";
 
   setTimeout(()=>{
     box.style.opacity="0";
-    setTimeout(()=>box.style.display="none",1000);
+    setTimeout(()=>{
+      box.style.display="none";
+      box.style.opacity="1";
+    },1000);
   },6000);
+}
+
+/* 🖌️ DRAWING FIXED PROPERLY */
+let ctx, drawing=false;
+
+window.onload=()=>{
+  const c=document.getElementById("draw");
+  c.width=window.innerWidth;
+  c.height=window.innerHeight;
+
+  ctx=c.getContext("2d");
+
+  c.addEventListener("mousedown",()=>drawing=true);
+  c.addEventListener("mouseup",()=>drawing=false);
+  c.addEventListener("mousemove",draw);
+
+  loadSides();
+  spawnParticles();
+};
+
+function draw(e){
+  if(!drawing) return;
+
+  ctx.strokeStyle="#ff4d6d";
+  ctx.lineWidth=4;
+  ctx.shadowBlur=20;
+  ctx.shadowColor="#ff4d6d";
+
+  ctx.lineTo(e.clientX,e.clientY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(e.clientX,e.clientY);
 }
 
 /* SIDES */
@@ -233,57 +299,14 @@ function loadSides(){
 
 /* PARTICLES */
 function spawnParticles(){
-  for(let i=0;i<120;i++){
+  for(let i=0;i<100;i++){
     const p=document.createElement("div");
     p.className="particle";
-
-    const size=2+Math.random()*6;
-    p.style.width=size+"px";
-    p.style.height=size+"px";
-
+    p.style.width=p.style.height=(2+Math.random()*5)+"px";
     p.style.left=Math.random()*window.innerWidth+"px";
     p.style.animationDuration=(4+Math.random()*6)+"s";
-
     document.body.appendChild(p);
   }
-}
-
-/* ✍️ NEON DRAWING */
-let ctx, drawing=false;
-
-window.onload=()=>{
-  const c=document.getElementById("draw");
-  c.width=window.innerWidth;
-  c.height=window.innerHeight;
-  ctx=c.getContext("2d");
-
-  c.addEventListener("mousedown",()=>drawing=true);
-  c.addEventListener("mouseup",()=>drawing=false);
-  c.addEventListener("mousemove",draw);
-
-  loadSides();
-  spawnParticles();
-};
-
-function draw(e){
-  if(!drawing) return;
-
-  const color="#ff4d6d";
-
-  ctx.strokeStyle=color;
-  ctx.lineWidth=4;
-  ctx.shadowBlur=15;
-  ctx.shadowColor=color;
-
-  ctx.lineTo(e.clientX,e.clientY);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(e.clientX,e.clientY);
-
-  setTimeout(()=>{
-    ctx.fillStyle="rgba(255,255,255,0.03)";
-    ctx.fillRect(0,0,window.innerWidth,window.innerHeight);
-  },1200);
 }
 
 </script>
