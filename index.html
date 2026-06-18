@@ -43,18 +43,11 @@
       justify-content: center;
       text-align: center;
       z-index: 2;
-    }
-
-    h1 { margin-bottom: 10px; }
-
-    p {
-      font-weight: bold;
-      color: #111;
+      position: relative;
     }
 
     button {
       padding: 12px 18px;
-      font-size: 15px;
       border: none;
       border-radius: 12px;
       margin: 5px;
@@ -72,18 +65,11 @@
     .grid img {
       width: 150px;
       height: 150px;
-      object-fit: cover;
       border-radius: 15px;
       display: none;
     }
 
-    #caption {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-      max-width: 420px;
-    }
-
+    /* MOOD */
     .moodBox {
       margin-top: 20px;
       background: rgba(255,255,255,0.4);
@@ -109,196 +95,199 @@
       to { transform: translateY(-10vh) scale(1.4); }
     }
 
-    /* EASTER EGG */
-    #zinchenkoEgg {
-      margin-top: 20px;
-      font-size: 12px;
-      opacity: 0.3;
-      cursor: pointer;
-      user-select: none;
+    /* ⚡ LIGHTNING FLASH */
+    #flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 999;
     }
 
-    #zinchenkoEgg:hover {
-      opacity: 0.7;
-      transform: scale(1.1);
-      transition: 0.2s;
+    /* ✍️ DRAW LAYER */
+    #drawCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      pointer-events: none;
     }
 
+    /* ⚽ ZINCHENKO */
     #zinchenkoDogs {
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
       display: none;
-      margin-top: 15px;
       gap: 10px;
-      justify-content: center;
+      z-index: 10;
     }
 
     #zinchenkoDogs img {
-      width: 120px;
-      height: 120px;
+      width: 140px;
+      height: 140px;
       border-radius: 12px;
-      object-fit: cover;
     }
   </style>
 </head>
 
 <body>
 
+<div id="flash"></div>
+<canvas id="drawCanvas"></canvas>
+
 <div class="side" id="leftSide"></div>
 
 <div class="center">
 
-  <h1>🐶 Simba Town</h1>
-
-  <button onclick="toggleMusic()" id="musicBtn">Play Music 🎵</button>
-  <button onclick="showDogs()">Click for comfort</button>
+  <button onclick="toggleMusic()">Music 🎵</button>
+  <button onclick="showDogs()">Comfort</button>
+  <button onclick="triggerLightning()">⚡ Storm</button>
 
   <div class="grid">
-    <img id="dog1">
-    <img id="dog2">
-    <img id="dog3">
+    <img id="dog1"><img id="dog2"><img id="dog3">
   </div>
 
-  <div id="caption"></div>
-
   <div class="moodBox">
-    <p>How much has Simba improved your mood?</p>
-    <input type="range" min="0" max="100" value="60" id="moodSlider" oninput="updateMood(this.value)">
+    <input type="range" min="0" max="100" value="60" oninput="updateMood(this.value)">
     <div id="moodValue">60%</div>
   </div>
 
-  <!-- ⚽ EASTER EGG -->
-  <div id="zinchenkoEgg" onclick="showZinchenko()">
-    ⚽ Zinchenko
-  </div>
-
-  <div id="zinchenkoDogs">
-    <img id="z1">
-    <img id="z2">
-    <img id="z3">
-  </div>
+  <div onclick="showZinchenko()" style="opacity:0.3;cursor:pointer;">⚽ Zinchenko</div>
 
 </div>
 
 <div class="side" id="rightSide"></div>
 
-<audio id="bgmusic" loop preload="auto">
-  <source src="music.mp3" type="audio/mpeg">
+<div id="zinchenkoDogs">
+  <img src="zin1.png">
+  <img src="zin2.png">
+  <img src="zin3.png">
+</div>
+
+<audio id="bgmusic" loop>
+  <source src="music.mp3">
 </audio>
 
 <script>
-const images = Array.from({length: 30}, (_, i) => `dog${i + 1}.jpg`);
+const images = Array.from({length:30}, (_,i)=>`dog${i+1}.jpg`);
 
-function showDogs() {
-  const ids = ["dog1", "dog2", "dog3"];
-  let picks = [];
+let isDrawing = false;
+let ctx;
 
-  while (picks.length < 3) {
-    let i = Math.floor(Math.random() * images.length);
-    if (!picks.includes(i)) picks.push(i);
-  }
+window.onload = () => {
+  const canvas = document.getElementById("drawCanvas");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ctx = canvas.getContext("2d");
 
-  for (let i = 0; i < 3; i++) {
-    const img = document.getElementById(ids[i]);
-    img.src = images[picks[i]];
-    img.style.display = "block";
-  }
+  canvas.addEventListener("mousemove", draw);
+  canvas.addEventListener("mousedown", ()=>isDrawing=true);
+  canvas.addEventListener("mouseup", ()=>isDrawing=false);
+
+  loadSides();
+  updateMood(60);
+  spawnParticles();
+  lightningLoop();
+};
+
+/* ✍️ NEON DRAWING */
+function draw(e){
+  if(!isDrawing) return;
+
+  const mood = document.getElementById("moodSlider")?.value || 60;
+
+  const colors = mood > 80 ? ["#ff4d6d","#ff85a1"] :
+                 mood > 40 ? ["#4dabf7","#74c0fc"] :
+                 ["#adb5bd","#666"];
+
+  const color = colors[Math.floor(Math.random()*colors.length)];
+
+  ctx.strokeStyle = color;
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = color;
+  ctx.lineWidth = 4;
+
+  ctx.lineTo(e.clientX, e.clientY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(e.clientX, e.clientY);
+
+  setTimeout(()=>fadeCanvas(), 2000);
 }
 
-/* 🎵 MUSIC */
-function toggleMusic() {
-  const music = document.getElementById("bgmusic");
-  const btn = document.getElementById("musicBtn");
-
-  if (music.paused) {
-    music.volume = 0.5;
-    music.play().then(() => {
-      btn.innerText = "Pause Music ⏸️";
-    });
-  } else {
-    music.pause();
-    btn.innerText = "Play Music 🎵";
-  }
+/* fade drawing */
+function fadeCanvas(){
+  ctx.fillStyle = "rgba(0,0,0,0.05)";
+  ctx.fillRect(0,0,window.innerWidth,window.innerHeight);
 }
 
-/* 🌈 MOOD SYSTEM */
-function updateMood(val) {
-  document.getElementById("moodValue").innerText = val + "%";
+/* ⚽ ZINCHENKO FADE */
+function showZinchenko(){
+  const box = document.getElementById("zinchenkoDogs");
+  box.style.display = "flex";
 
-  let bg, colors;
-
-  if (val < 20) {
-    bg = "#1a1a1a";
-    colors = ["#444", "#666"];
-  } else if (val < 40) {
-    bg = "#4a4e69";
-    colors = ["#6c757d", "#adb5bd"];
-  } else if (val < 60) {
-    bg = "#5f6f94";
-    colors = ["#4dabf7", "#74c0fc"];
-  } else if (val < 80) {
-    bg = "#caffbf";
-    colors = ["#8ce99a", "#b2f2bb"];
-  } else {
-    bg = "#ffb3d9";
-    colors = ["#ff4d6d", "#ff85a1", "#ff9ecf"];
-  }
-
-  document.body.style.background = bg;
-  regenerateParticles(colors);
+  setTimeout(()=>{
+    box.style.opacity = "0";
+    setTimeout(()=>{
+      box.style.display="none";
+      box.style.opacity="1";
+    },1000);
+  },6000);
 }
 
-/* ✨ PARTICLES */
-function regenerateParticles(colors) {
-  document.querySelectorAll(".particle").forEach(p => p.remove());
+/* ⚡ LIGHTNING */
+function triggerLightning(){
+  const flash = document.getElementById("flash");
 
-  for (let i = 0; i < 80; i++) {
+  flash.style.opacity = 1;
+
+  setTimeout(()=>flash.style.opacity = 0, 150);
+}
+
+function lightningLoop(){
+  setInterval(()=>{
+    if(Math.random() > 0.85){
+      triggerLightning();
+    }
+  }, 2000);
+}
+
+/* PARTICLES (kept simple) */
+function spawnParticles(){
+  for(let i=0;i<80;i++){
     const p = document.createElement("div");
-    p.className = "particle";
-
-    const size = 4 + Math.random() * 8;
-
-    p.style.width = size + "px";
-    p.style.height = size + "px";
-
-    p.style.left = Math.random() * window.innerWidth + "px";
-    p.style.animationDuration = (3 + Math.random() * 5) + "s";
-
-    const c = colors[Math.floor(Math.random() * colors.length)];
-    p.style.background = c;
-    p.style.boxShadow = `0 0 10px ${c}`;
-
+    p.className="particle";
+    p.style.width = p.style.height = (3+Math.random()*6)+"px";
+    p.style.left = Math.random()*window.innerWidth+"px";
+    p.style.animationDuration = (3+Math.random()*5)+"s";
+    p.style.background = "#fff";
     document.body.appendChild(p);
   }
 }
 
-/* 🐾 SIDES */
-function loadSides() {
-  const left = document.getElementById("leftSide");
-  const right = document.getElementById("rightSide");
+/* MUSIC */
+function toggleMusic(){
+  const m = document.getElementById("bgmusic");
+  m.paused ? m.play() : m.pause();
+}
 
-  for (let i = 0; i < 6; i++) {
-    let imgL = document.createElement("img");
-    let imgR = document.createElement("img");
-
-    imgL.src = images[Math.floor(Math.random() * images.length)];
-    imgR.src = images[Math.floor(Math.random() * images.length)];
-
-    left.appendChild(imgL);
-    right.appendChild(imgR);
+/* DOGS */
+function showDogs(){
+  const ids=["dog1","dog2","dog3"];
+  for(let i=0;i<3;i++){
+    const el=document.getElementById(ids[i]);
+    el.src=`dog${Math.floor(Math.random()*30)+1}.jpg`;
+    el.style.display="block";
   }
 }
-
-/* ⚽ ZINCHENKO EASTER EGG */
-function showZinchenko() {
-  document.getElementById("z1").src = "zin1.png";
-  document.getElementById("z2").src = "zin2.png";
-  document.getElementById("z3").src = "zin3.png";
-
-  document.getElementById("zinchenkoDogs").style.display = "flex";
-}
-
-/* INIT */
-loadSides();
-updateMood(60);
 </script>
 
 </body>
