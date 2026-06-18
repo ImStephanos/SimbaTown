@@ -9,13 +9,20 @@
       text-align: center;
       padding: 40px;
 
-      /* nicer background */
-      background: linear-gradient(135deg, #fff7f0, #ffe4ec);
+      /* ✨ animated background */
+      background: linear-gradient(-45deg, #fff7f0, #ffe4ec, #e0f7ff, #fff0f6);
+      background-size: 400% 400%;
+      animation: gradientMove 12s ease infinite;
 
-      /* center everything */
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     h1 {
@@ -35,10 +42,12 @@
       background: #ff7b7b;
       color: white;
       cursor: pointer;
+      transition: 0.2s ease;
     }
 
     button:hover {
       background: #ff5f5f;
+      transform: scale(1.05);
     }
 
     img {
@@ -73,29 +82,59 @@
 const images = Array.from({length: 30}, (_, i) => `dog${i + 1}.jpg`);
 
 const captions = [
-  "Feeling down… welcome to Simba Town 🐶",
-  "Simba has detected low mood levels.",
+  "Simba Town is open 🐶",
+  "Simba has entered the chat.",
   "You are safe here.",
-  "Simba is watching over you.",
-  "Take a breath. You’re okay.",
-  "Dog comfort protocol activated.",
-  "Simba approves of your existence.",
-  "You are not alone right now.",
   "This is your soft reset moment.",
-  "Welcome to a safer place."
+  "Dog support protocol activated.",
+  "Simba approves of your existence.",
+  "You are not alone.",
+  "Take a breath. You’re okay.",
+  "Welcome to comfort mode.",
+  "Simba is watching over you.",
+  "Everything is okay right now.",
+  "You’ve been selected for dog support.",
+  "This is your reminder to rest.",
+  "Simba believes in you.",
+  "No thoughts. Just dogs.",
+  "You are doing better than you think.",
+  "Emergency happiness delivery 🐶",
+  "Simba says: stay a while.",
+  "You matter more than you think.",
+  "Soft moment detected.",
+  "You are under emotional support protection.",
+  "Dog energy incoming.",
+  "Simba is proud of you.",
+  "You’re safe in Simba Town.",
+  "Pause. Breathe. Dog time.",
+  "Everything will be okay.",
+  "Simba is here for you.",
+  "Gentle reminder: you’re enough.",
+  "Comfort mode engaged.",
+  "This dog believes in you.",
+  "Welcome home 🐶"
 ];
 
-function showDog() {
-  const imgIndex = Math.floor(Math.random() * images.length);
-  const capIndex = Math.floor(Math.random() * captions.length);
+let lastIndex = -1;
 
+function showDog() {
   const img = document.getElementById("dog");
   const cap = document.getElementById("caption");
 
-  img.src = images[imgIndex];
+  // prevent same image twice in a row
+  let newIndex;
+  do {
+    newIndex = Math.floor(Math.random() * images.length);
+  } while (newIndex === lastIndex);
+
+  lastIndex = newIndex;
+
+  const captionIndex = Math.floor(Math.random() * captions.length);
+
+  img.src = images[newIndex];
   img.style.display = "block";
 
-  cap.innerText = captions[capIndex];
+  cap.innerText = captions[captionIndex];
   cap.style.display = "block";
 }
 </script>
