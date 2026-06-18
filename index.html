@@ -13,6 +13,7 @@
       background: linear-gradient(-45deg, #ffb3c6, #ffd6a5, #caffbf, #a0c4ff);
       background-size: 400% 400%;
       animation: bgMove 12s ease infinite;
+      transition: background 0.6s ease;
     }
 
     @keyframes bgMove {
@@ -41,7 +42,7 @@
       box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
 
-    /* CENTER UI */
+    /* CENTER */
     .center {
       flex: 1;
       display: flex;
@@ -91,6 +92,11 @@
       border-radius: 15px;
     }
 
+    #moodLabel {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
     input[type="range"] {
       width: 220px;
     }
@@ -109,12 +115,12 @@
       to { transform: translateY(-10vh); }
     }
 
-    /* DRAW LAYER (IMPORTANT FIX) */
+    /* DRAWING LAYER (FIXED - DOES NOT BLOCK UI) */
     canvas {
       position: fixed;
       inset: 0;
       z-index: 5;
-      cursor: crosshair;
+      pointer-events: none;
     }
 
     /* ZINCHENKO */
@@ -154,8 +160,9 @@
 
   <div id="caption"></div>
 
-  <!-- ✅ MOOD BAR RESTORED -->
+  <!-- MOOD -->
   <div class="moodBox">
+    <div id="moodLabel">🐶 How much have Simba's photos improved your mood?</div>
     <input type="range" min="0" max="100" value="60" oninput="updateMood(this.value)">
     <div id="moodValue">60%</div>
   </div>
@@ -201,7 +208,7 @@ const captions = [
   "Simba… Simba… Simbaa…"
 ];
 
-/* 🐶 DOGS */
+/* DOGS */
 function showDogs(){
   const ids=["dog1","dog2","dog3"];
 
@@ -215,69 +222,87 @@ function showDogs(){
     captions[Math.floor(Math.random()*captions.length)];
 }
 
-/* 🎵 MUSIC */
+/* MUSIC */
 function toggleMusic(){
   const m=document.getElementById("music");
   m.paused ? m.play() : m.pause();
 }
 
-/* 🌈 MOOD (NOW CONNECTED PROPERLY) */
+/* MOOD → CHANGES BACKGROUND COLOURS */
 function updateMood(v){
   document.getElementById("moodValue").innerText = v + "%";
 
-  const intensity = v / 100;
+  let bg;
 
-  document.querySelectorAll(".particle").forEach(p=>{
-    p.style.opacity = 0.2 + intensity;
-  });
+  if(v < 20) bg = "#ff9a9e, #fad0c4";
+  else if(v < 40) bg = "#a1ffce, #faffd1";
+  else if(v < 60) bg = "#74ebd5, #acb6e5";
+  else if(v < 80) bg = "#c471ed, #f64f59";
+  else bg = "#fbc2eb, #a6c1ee";
 
-  document.body.style.filter = `saturate(${0.7 + intensity})`;
+  document.body.style.background = `linear-gradient(-45deg, ${bg})`;
 }
 
-/* ⚽ ZINCHENKO */
+/* ZINCHENKO */
 function showZinchenko(){
   const box=document.getElementById("zinchenkoDogs");
   box.style.display="flex";
+  box.style.opacity="1";
 
   setTimeout(()=>{
     box.style.opacity="0";
-    setTimeout(()=>{
-      box.style.display="none";
-      box.style.opacity="1";
-    },1000);
+    setTimeout(()=>box.style.display="none",1000);
   },6000);
 }
 
-/* 🖌️ DRAWING FIXED PROPERLY */
-let ctx, drawing=false;
+/* DRAWING SYSTEM (FIXED PROPERLY) */
+let ctx;
+let drawing = false;
+let strokes = [];
 
-window.onload=()=>{
-  const c=document.getElementById("draw");
-  c.width=window.innerWidth;
-  c.height=window.innerHeight;
+window.onload = () => {
+  const c = document.getElementById("draw");
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
 
-  ctx=c.getContext("2d");
+  ctx = c.getContext("2d");
 
-  c.addEventListener("mousedown",()=>drawing=true);
-  c.addEventListener("mouseup",()=>drawing=false);
-  c.addEventListener("mousemove",draw);
+  document.addEventListener("mousedown", startDraw);
+  document.addEventListener("mouseup", stopDraw);
+  document.addEventListener("mousemove", draw);
 
   loadSides();
   spawnParticles();
+
+  setInterval(fadeStrokes, 1000);
 };
+
+function startDraw(e){
+  drawing = true;
+  ctx.beginPath();
+  ctx.moveTo(e.clientX, e.clientY);
+}
+
+function stopDraw(){
+  drawing = false;
+  ctx.beginPath();
+}
 
 function draw(e){
   if(!drawing) return;
 
-  ctx.strokeStyle="#ff4d6d";
-  ctx.lineWidth=4;
-  ctx.shadowBlur=20;
-  ctx.shadowColor="#ff4d6d";
+  ctx.strokeStyle = "#ff4d6d";
+  ctx.lineWidth = 4;
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = "#ff4d6d";
 
-  ctx.lineTo(e.clientX,e.clientY);
+  ctx.lineTo(e.clientX, e.clientY);
   ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(e.clientX,e.clientY);
+}
+
+function fadeStrokes(){
+  ctx.fillStyle = "rgba(255,255,255,0.03)";
+  ctx.fillRect(0,0,window.innerWidth,window.innerHeight);
 }
 
 /* SIDES */
@@ -299,12 +324,12 @@ function loadSides(){
 
 /* PARTICLES */
 function spawnParticles(){
-  for(let i=0;i<100;i++){
+  for(let i=0;i<120;i++){
     const p=document.createElement("div");
     p.className="particle";
-    p.style.width=p.style.height=(2+Math.random()*5)+"px";
-    p.style.left=Math.random()*window.innerWidth+"px";
-    p.style.animationDuration=(4+Math.random()*6)+"s";
+    p.style.width = p.style.height = (2 + Math.random()*5) + "px";
+    p.style.left = Math.random()*window.innerWidth + "px";
+    p.style.animationDuration = (4 + Math.random()*6) + "s";
     document.body.appendChild(p);
   }
 }
