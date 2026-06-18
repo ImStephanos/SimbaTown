@@ -9,17 +9,13 @@
       font-family: Arial, sans-serif;
       overflow: hidden;
 
-      background: linear-gradient(-45deg,
-        #ffb3c6, #ffd6a5, #fdffb6,
-        #caffbf, #9bf6ff, #a0c4ff,
-        #bdb2ff, #ffc6ff
-      );
-
+      background: linear-gradient(-45deg, #ffb3c6, #ffd6a5, #fdffb6, #caffbf);
       background-size: 500% 500%;
       animation: gradientMove 6s ease infinite;
 
       display: flex;
       height: 100vh;
+      transition: background 0.6s ease;
     }
 
     @keyframes gradientMove {
@@ -37,6 +33,7 @@
       justify-content: center;
       gap: 10px;
       padding: 10px;
+      z-index: 2;
     }
 
     .side img {
@@ -45,11 +42,6 @@
       object-fit: cover;
       border-radius: 15px;
       box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-      transition: 0.3s;
-    }
-
-    .side img:hover {
-      transform: scale(1.05);
     }
 
     /* CENTER */
@@ -60,11 +52,11 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      position: relative;
       z-index: 2;
     }
 
     h1 { margin-bottom: 10px; }
+
     p {
       font-weight: bold;
       color: #111;
@@ -91,7 +83,6 @@
       display: flex;
       gap: 15px;
       margin-top: 25px;
-      justify-content: center;
     }
 
     .grid img {
@@ -110,7 +101,7 @@
       max-width: 420px;
     }
 
-    /* MOOD BAR */
+    /* MOOD BOX */
     .moodBox {
       margin-top: 20px;
       background: rgba(255,255,255,0.4);
@@ -120,33 +111,33 @@
     }
 
     input[type="range"] {
-      width: 200px;
+      width: 220px;
     }
 
-    /* PARTICLES */
+    /* PARTICLES (MORE INTENSE) */
     .particle {
       position: absolute;
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       background: white;
       border-radius: 50%;
-      opacity: 0.6;
+      opacity: 0.8;
       animation: floatUp linear infinite;
+      z-index: 1;
+      box-shadow: 0 0 10px rgba(255,255,255,0.6);
     }
 
     @keyframes floatUp {
-      from { transform: translateY(100vh); }
-      to { transform: translateY(-10vh); }
+      from { transform: translateY(100vh) scale(0.8); }
+      to { transform: translateY(-10vh) scale(1.4); }
     }
   </style>
 </head>
 
 <body>
 
-<!-- LEFT SIDE -->
 <div class="side" id="leftSide"></div>
 
-<!-- CENTER -->
 <div class="center">
 
   <h1>🐶 Simba Town</h1>
@@ -163,7 +154,6 @@
 
   <div id="caption"></div>
 
-  <!-- MOOD BAR -->
   <div class="moodBox">
     <p>How much has Simba improved your mood?</p>
     <input type="range" min="0" max="100" value="50" id="moodSlider" oninput="updateMood(this.value)">
@@ -172,32 +162,17 @@
 
 </div>
 
-<!-- RIGHT SIDE -->
 <div class="side" id="rightSide"></div>
 
-<!-- MUSIC -->
-<audio id="bgmusic" loop>
+<audio id="bgmusic" loop preload="auto">
   <source src="music.mp3" type="audio/mpeg">
 </audio>
 
 <script>
 const images = Array.from({length: 30}, (_, i) => `dog${i + 1}.jpg`);
 
-const captions = [
-  "Simba says: Smile!",
-  "Simba says: Lock in!",
-  "Simba says: He loves you!",
-  "Mackenzie, you are enough!",
-  "You are loved.",
-  "Emergency comfort activated.",
-  "Take a breath. You’re safe here.",
-  "Simba is proud of you.",
-  "Comfort mode engaged."
-];
-
-let lastIndex = -1;
-
 function showDogs() {
+  const ids = ["dog1", "dog2", "dog3"];
   const caption = document.getElementById("caption");
 
   let picks = [];
@@ -206,42 +181,60 @@ function showDogs() {
     if (!picks.includes(i)) picks.push(i);
   }
 
-  const ids = ["dog1", "dog2", "dog3"];
-
   for (let i = 0; i < 3; i++) {
     const img = document.getElementById(ids[i]);
     img.src = images[picks[i]];
     img.style.display = "block";
   }
-
-  caption.innerText = captions[Math.floor(Math.random() * captions.length)];
 }
 
-/* MUSIC */
+/* 🎵 MUSIC */
 function toggleMusic() {
   const music = document.getElementById("bgmusic");
   const btn = document.getElementById("musicBtn");
 
   if (music.paused) {
-    music.play();
-    btn.innerText = "Pause Music ⏸️";
+    music.volume = 0.5;
+
+    music.play().then(() => {
+      btn.innerText = "Pause Music ⏸️";
+    }).catch(() => {
+      alert("Tap again to start music");
+    });
+
   } else {
     music.pause();
     btn.innerText = "Play Music 🎵";
   }
 }
 
-/* MOOD BAR */
+/* 📊 MOOD → BACKGROUND COLOR */
 function updateMood(val) {
   document.getElementById("moodValue").innerText = val + "%";
+
+  let color;
+
+  if (val < 20) {
+    color = "#2b2d42"; // very low mood (dark)
+  } else if (val < 40) {
+    color = "#6c757d"; // low
+  } else if (val < 60) {
+    color = "#ffd6a5"; // neutral warm
+  } else if (val < 80) {
+    color = "#caffbf"; // good
+  } else {
+    color = "#9bf6ff"; // very happy
+  }
+
+  document.body.style.background = color;
 }
 
-/* SIDE IMAGE FILLERS */
+/* 🐾 SIDES */
 function loadSides() {
   const left = document.getElementById("leftSide");
   const right = document.getElementById("rightSide");
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     let imgL = document.createElement("img");
     let imgR = document.createElement("img");
 
@@ -253,20 +246,26 @@ function loadSides() {
   }
 }
 
-/* PARTICLES */
+/* ✨ INTENSE PARTICLES */
 function createParticles() {
-  for (let i = 0; i < 25; i++) {
-    let p = document.createElement("div");
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement("div");
     p.className = "particle";
 
+    const size = 4 + Math.random() * 6;
+
+    p.style.width = size + "px";
+    p.style.height = size + "px";
+
     p.style.left = Math.random() * window.innerWidth + "px";
-    p.style.animationDuration = (5 + Math.random() * 5) + "s";
-    p.style.opacity = Math.random();
+    p.style.animationDuration = (3 + Math.random() * 5) + "s";
+    p.style.opacity = 0.4 + Math.random() * 0.6;
 
     document.body.appendChild(p);
   }
 }
 
+/* INIT */
 loadSides();
 createParticles();
 </script>
