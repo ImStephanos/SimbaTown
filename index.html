@@ -5,9 +5,9 @@
 
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 40px;
+      overflow: hidden;
 
       background: linear-gradient(-45deg,
         #ffb3c6, #ffd6a5, #fdffb6,
@@ -19,8 +19,7 @@
       animation: gradientMove 6s ease infinite;
 
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      height: 100vh;
     }
 
     @keyframes gradientMove {
@@ -29,12 +28,44 @@
       100% { background-position: 0% 50%; }
     }
 
-    h1 {
-      margin-bottom: 10px;
+    /* SIDES */
+    .side {
+      width: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
     }
 
+    .side img {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      transition: 0.3s;
+    }
+
+    .side img:hover {
+      transform: scale(1.05);
+    }
+
+    /* CENTER */
+    .center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    h1 { margin-bottom: 10px; }
     p {
-      margin-bottom: 15px;
       font-weight: bold;
       color: #111;
     }
@@ -61,7 +92,6 @@
       gap: 15px;
       margin-top: 25px;
       justify-content: center;
-      flex-wrap: wrap;
     }
 
     .grid img {
@@ -78,33 +108,74 @@
       font-size: 18px;
       font-weight: bold;
       max-width: 420px;
-      color: #111;
+    }
+
+    /* MOOD BAR */
+    .moodBox {
+      margin-top: 20px;
+      background: rgba(255,255,255,0.4);
+      padding: 12px;
+      border-radius: 15px;
+      backdrop-filter: blur(5px);
+    }
+
+    input[type="range"] {
+      width: 200px;
+    }
+
+    /* PARTICLES */
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(100vh); }
+      to { transform: translateY(-10vh); }
     }
   </style>
 </head>
 
 <body>
 
-<h1>🐶 Simba Town</h1>
+<!-- LEFT SIDE -->
+<div class="side" id="leftSide"></div>
 
-<p>Feeling down… welcome to Simba Town.</p>
+<!-- CENTER -->
+<div class="center">
 
-<!-- Music button -->
-<button onclick="toggleMusic()" id="musicBtn">Play Music 🎵</button>
+  <h1>🐶 Simba Town</h1>
+  <p>Feeling down… welcome to Simba Town.</p>
 
-<!-- Main button -->
-<button onclick="showDogs()">Click for comfort</button>
+  <button onclick="toggleMusic()" id="musicBtn">Play Music 🎵</button>
+  <button onclick="showDogs()">Click for comfort</button>
 
-<!-- 3 images -->
-<div class="grid">
-  <img id="dog1">
-  <img id="dog2">
-  <img id="dog3">
+  <div class="grid">
+    <img id="dog1">
+    <img id="dog2">
+    <img id="dog3">
+  </div>
+
+  <div id="caption"></div>
+
+  <!-- MOOD BAR -->
+  <div class="moodBox">
+    <p>How much has Simba improved your mood?</p>
+    <input type="range" min="0" max="100" value="50" id="moodSlider" oninput="updateMood(this.value)">
+    <div id="moodValue">50%</div>
+  </div>
+
 </div>
 
-<div id="caption"></div>
+<!-- RIGHT SIDE -->
+<div class="side" id="rightSide"></div>
 
-<!-- Music -->
+<!-- MUSIC -->
 <audio id="bgmusic" loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
@@ -116,33 +187,12 @@ const captions = [
   "Simba says: Smile!",
   "Simba says: Lock in!",
   "Simba says: He loves you!",
-  "He might not be The Lion King, but he is Simba.",
   "Mackenzie, you are enough!",
-  "A photo of Simba a day keeps the stress away.",
-  "Welcome to The Simba Safehouse.",
-  "Simba Nation RISE UP!",
-  "PAUSE — go and cuddle Simba immediately!",
-  "Did you know today is National Hug Simba Day?",
-  "Simbaaaaa 🐶",
-  "A sad Mackenzie equals a sad Simba — lock tf in.",
   "You are loved.",
-  "If you’re reading this you need to hug Simba!",
-  "Fun fact: hugging Simba reduces stress.",
-  "Simba… Simba… Simbaa…",
-  "Simba believes in you.",
   "Emergency comfort activated.",
-  "You are doing better than you think.",
-  "Simba is proud of you.",
   "Take a breath. You’re safe here.",
-  "Everything will be okay.",
-  "Soft moment detected.",
-  "Welcome home 🐶",
-  "Simba is watching over you.",
-  "You matter more than you think.",
-  "Pause. Breathe. Simba time.",
-  "Comfort mode engaged.",
-  "This dog believes in you.",
-  "Safe zone active."
+  "Simba is proud of you.",
+  "Comfort mode engaged."
 ];
 
 let lastIndex = -1;
@@ -153,10 +203,8 @@ function showDogs() {
   let picks = [];
   while (picks.length < 3) {
     let i = Math.floor(Math.random() * images.length);
-    if (!picks.includes(i) && i !== lastIndex) picks.push(i);
+    if (!picks.includes(i)) picks.push(i);
   }
-
-  lastIndex = picks[0];
 
   const ids = ["dog1", "dog2", "dog3"];
 
@@ -166,10 +214,10 @@ function showDogs() {
     img.style.display = "block";
   }
 
-  const capIndex = Math.floor(Math.random() * captions.length);
-  caption.innerText = captions[capIndex];
+  caption.innerText = captions[Math.floor(Math.random() * captions.length)];
 }
 
+/* MUSIC */
 function toggleMusic() {
   const music = document.getElementById("bgmusic");
   const btn = document.getElementById("musicBtn");
@@ -182,6 +230,45 @@ function toggleMusic() {
     btn.innerText = "Play Music 🎵";
   }
 }
+
+/* MOOD BAR */
+function updateMood(val) {
+  document.getElementById("moodValue").innerText = val + "%";
+}
+
+/* SIDE IMAGE FILLERS */
+function loadSides() {
+  const left = document.getElementById("leftSide");
+  const right = document.getElementById("rightSide");
+
+  for (let i = 0; i < 5; i++) {
+    let imgL = document.createElement("img");
+    let imgR = document.createElement("img");
+
+    imgL.src = images[Math.floor(Math.random() * images.length)];
+    imgR.src = images[Math.floor(Math.random() * images.length)];
+
+    left.appendChild(imgL);
+    right.appendChild(imgR);
+  }
+}
+
+/* PARTICLES */
+function createParticles() {
+  for (let i = 0; i < 25; i++) {
+    let p = document.createElement("div");
+    p.className = "particle";
+
+    p.style.left = Math.random() * window.innerWidth + "px";
+    p.style.animationDuration = (5 + Math.random() * 5) + "s";
+    p.style.opacity = Math.random();
+
+    document.body.appendChild(p);
+  }
+}
+
+loadSides();
+createParticles();
 </script>
 
 </body>
