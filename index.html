@@ -9,10 +9,20 @@
       text-align: center;
       padding: 40px;
 
-      /* ✨ animated background */
-      background: linear-gradient(-45deg, #fff7f0, #ffe4ec, #e0f7ff, #fff0f6);
-      background-size: 400% 400%;
-      animation: gradientMove 12s ease infinite;
+      /* 🌈 faster, brighter pastel animation */
+      background: linear-gradient(-45deg,
+        #ffb3c6,
+        #ffd6a5,
+        #fdffb6,
+        #caffbf,
+        #9bf6ff,
+        #a0c4ff,
+        #bdb2ff,
+        #ffc6ff
+      );
+
+      background-size: 500% 500%;
+      animation: gradientMove 6s ease infinite;
 
       display: flex;
       flex-direction: column;
@@ -31,7 +41,8 @@
 
     p {
       margin-bottom: 20px;
-      color: #444;
+      color: #222;
+      font-weight: bold;
     }
 
     button {
@@ -39,15 +50,15 @@
       font-size: 16px;
       border: none;
       border-radius: 12px;
-      background: #ff7b7b;
+      background: #ff4d6d;
       color: white;
       cursor: pointer;
       transition: 0.2s ease;
     }
 
     button:hover {
-      background: #ff5f5f;
       transform: scale(1.05);
+      background: #ff2e63;
     }
 
     img {
@@ -60,9 +71,10 @@
     #caption {
       margin-top: 15px;
       font-size: 18px;
-      color: #333;
+      color: #111;
       display: none;
       max-width: 420px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -82,36 +94,35 @@
 const images = Array.from({length: 30}, (_, i) => `dog${i + 1}.jpg`);
 
 const captions = [
-  "Simba Town is open 🐶",
-  "Simba has entered the chat.",
-  "You are safe here.",
-  "This is your soft reset moment.",
-  "Dog support protocol activated.",
-  "Simba approves of your existence.",
-  "You are not alone.",
-  "Take a breath. You’re okay.",
-  "Welcome to comfort mode.",
-  "Simba is watching over you.",
-  "Everything is okay right now.",
-  "You’ve been selected for dog support.",
-  "This is your reminder to rest.",
+  "Simba says: Smile!",
+  "Simba says: Lock in!",
+  "Simba says: He loves you!",
+  "He might not be The Lion King, but he is Simba.",
+  "Mackenzie, you are enough!",
+  "A photo of Simba a day keeps the stress away.",
+  "Welcome to The Simba Safehouse.",
+  "Simba Nation RISE UP!",
+  "PAUSE — go and cuddle Simba immediately!",
+  "Did you know today is National Hug Simba Day?",
+  "Simbaaaaa 🐶",
+  "A sad Mackenzie equals a sad Simba — lock tf in.",
+  "You are loved.",
+  "If you’re reading this you need to hug Simba!",
+  "Fun fact: hugging Simba for 7 minutes reduces stress dramatically.",
+  "Simba… Simba… Simbaa…",
   "Simba believes in you.",
-  "No thoughts. Just dogs.",
+  "Emergency Simba comfort activated.",
   "You are doing better than you think.",
-  "Emergency happiness delivery 🐶",
-  "Simba says: stay a while.",
-  "You matter more than you think.",
-  "Soft moment detected.",
-  "You are under emotional support protection.",
-  "Dog energy incoming.",
   "Simba is proud of you.",
-  "You’re safe in Simba Town.",
-  "Pause. Breathe. Dog time.",
-  "Everything will be okay.",
-  "Simba is here for you.",
-  "Gentle reminder: you’re enough.",
-  "Comfort mode engaged.",
-  "This dog believes in you.",
+  "Take a breath. You’re safe here.",
+  "This is your comfort checkpoint.",
+  "Simba has entered the chat.",
+  "Everything is okay right now.",
+  "You are not alone.",
+  "SIMBA TIME.",
+  "Simba is watching over you.",
+  "You matter more than you think.",
+  "Pause. Breathe. Simba time.",
   "Welcome home 🐶"
 ];
 
