@@ -9,16 +9,10 @@
       text-align: center;
       padding: 40px;
 
-      /* 🌈 faster, brighter pastel animation */
       background: linear-gradient(-45deg,
-        #ffb3c6,
-        #ffd6a5,
-        #fdffb6,
-        #caffbf,
-        #9bf6ff,
-        #a0c4ff,
-        #bdb2ff,
-        #ffc6ff
+        #ffb3c6, #ffd6a5, #fdffb6,
+        #caffbf, #9bf6ff, #a0c4ff,
+        #bdb2ff, #ffc6ff
       );
 
       background-size: 500% 500%;
@@ -40,20 +34,21 @@
     }
 
     p {
-      margin-bottom: 20px;
-      color: #222;
+      margin-bottom: 15px;
       font-weight: bold;
+      color: #111;
     }
 
     button {
-      padding: 15px 20px;
-      font-size: 16px;
+      padding: 12px 18px;
+      font-size: 15px;
       border: none;
       border-radius: 12px;
+      margin: 5px;
       background: #ff4d6d;
       color: white;
       cursor: pointer;
-      transition: 0.2s ease;
+      transition: 0.2s;
     }
 
     button:hover {
@@ -61,20 +56,29 @@
       background: #ff2e63;
     }
 
-    img {
+    .grid {
+      display: flex;
+      gap: 15px;
       margin-top: 25px;
-      max-width: 320px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .grid img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
       border-radius: 15px;
       display: none;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
 
     #caption {
-      margin-top: 15px;
+      margin-top: 20px;
       font-size: 18px;
-      color: #111;
-      display: none;
-      max-width: 420px;
       font-weight: bold;
+      max-width: 420px;
+      color: #111;
     }
   </style>
 </head>
@@ -85,10 +89,25 @@
 
 <p>Feeling down… welcome to Simba Town.</p>
 
-<button onclick="showDog()">Click for comfort</button>
+<!-- Music button -->
+<button onclick="toggleMusic()" id="musicBtn">Play Music 🎵</button>
 
-<img id="dog" src="">
+<!-- Main button -->
+<button onclick="showDogs()">Click for comfort</button>
+
+<!-- 3 images -->
+<div class="grid">
+  <img id="dog1">
+  <img id="dog2">
+  <img id="dog3">
+</div>
+
 <div id="caption"></div>
+
+<!-- Music -->
+<audio id="bgmusic" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
 
 <script>
 const images = Array.from({length: 30}, (_, i) => `dog${i + 1}.jpg`);
@@ -108,45 +127,60 @@ const captions = [
   "A sad Mackenzie equals a sad Simba — lock tf in.",
   "You are loved.",
   "If you’re reading this you need to hug Simba!",
-  "Fun fact: hugging Simba for 7 minutes reduces stress dramatically.",
+  "Fun fact: hugging Simba reduces stress.",
   "Simba… Simba… Simbaa…",
   "Simba believes in you.",
-  "Emergency Simba comfort activated.",
+  "Emergency comfort activated.",
   "You are doing better than you think.",
   "Simba is proud of you.",
   "Take a breath. You’re safe here.",
-  "This is your comfort checkpoint.",
-  "Simba has entered the chat.",
-  "Everything is okay right now.",
-  "You are not alone.",
-  "SIMBA TIME.",
+  "Everything will be okay.",
+  "Soft moment detected.",
+  "Welcome home 🐶",
   "Simba is watching over you.",
   "You matter more than you think.",
   "Pause. Breathe. Simba time.",
-  "Welcome home 🐶"
+  "Comfort mode engaged.",
+  "This dog believes in you.",
+  "Safe zone active."
 ];
 
 let lastIndex = -1;
 
-function showDog() {
-  const img = document.getElementById("dog");
-  const cap = document.getElementById("caption");
+function showDogs() {
+  const caption = document.getElementById("caption");
 
-  // prevent same image twice in a row
-  let newIndex;
-  do {
-    newIndex = Math.floor(Math.random() * images.length);
-  } while (newIndex === lastIndex);
+  let picks = [];
+  while (picks.length < 3) {
+    let i = Math.floor(Math.random() * images.length);
+    if (!picks.includes(i) && i !== lastIndex) picks.push(i);
+  }
 
-  lastIndex = newIndex;
+  lastIndex = picks[0];
 
-  const captionIndex = Math.floor(Math.random() * captions.length);
+  const ids = ["dog1", "dog2", "dog3"];
 
-  img.src = images[newIndex];
-  img.style.display = "block";
+  for (let i = 0; i < 3; i++) {
+    const img = document.getElementById(ids[i]);
+    img.src = images[picks[i]];
+    img.style.display = "block";
+  }
 
-  cap.innerText = captions[captionIndex];
-  cap.style.display = "block";
+  const capIndex = Math.floor(Math.random() * captions.length);
+  caption.innerText = captions[capIndex];
+}
+
+function toggleMusic() {
+  const music = document.getElementById("bgmusic");
+  const btn = document.getElementById("musicBtn");
+
+  if (music.paused) {
+    music.play();
+    btn.innerText = "Pause Music ⏸️";
+  } else {
+    music.pause();
+    btn.innerText = "Play Music 🎵";
+  }
 }
 </script>
 
